@@ -1,0 +1,74 @@
+# DigitalOcean App Platform spec for the deploy-test branch.
+#
+#   https://<domain>/        -> "web"  static site: landing page + LMS (deploy/build-web.sh)
+#   https://<domain>/api/*   -> "api"  backend (backend/DockerFile); the /api prefix is stripped,
+#                                      so /api/auth/login reaches the backend as /auth/login
+#
+# Secrets (DATABASE_URL, SUPABASE_*, SMTP_*, TWILIO_*, ...) are NOT kept here. They are
+# added in the App Platform dashboard as encrypted (SECRET) env vars on the "api" component.
+# ${APP_URL} is the app's live URL: the ondigitalocean.app URL until a custom domain is the primary.
+name: aan-investment
+region: blr
+
+ingress:
+  rules:
+    - match:
+        path:
+          prefix: /api
+      component:
+        name: api
+        preserve_path_prefix: false
+    - match:
+        path:
+          prefix: /
+      component:
+        name: web
+
+services:
+  - name: api
+    github:
+      repo: aaninvestment2-debug/Aan-Investment
+      branch: deploy-test
+      deploy_on_push: true
+    source_dir: backend
+    dockerfile_path: backend/DockerFile
+    http_port: 3000
+    instance_count: 1 # keep at 1: the notification scheduler runs in-process
+    instance_size_slug: apps-s-1vcpu-0.5gb
+    health_check:
+      http_path: /health
+      initial_delay_seconds: 20
+    envs:
+      - key: NODE_ENV
+        value: production
+        scope: RUN_TIME
+      - key: PORT
+        value: "3000"
+        scope: RUN_TIME
+      - key: CORS_ORIGINS
+        value: ${APP_URL},https://aanfinance.com,https://www.aanfinance.com
+        scope: RUN_TIME
+      - key: APP_PASSWORD_RESET_URL
+        value: ${APP_URL}/reset-password
+        scope: RUN_TIME
+
+static_sites:
+  - name: web
+    github:
+      repo: aaninvestment2-debug/Aan-Investment
+      branch: deploy-test
+      deploy_on_push: true
+    source_dir: /
+    environment_slug: node-js
+    build_command: npm run build
+    output_dir: dist
+    catchall_document: app.html
+    envs:
+      - key: VITE_API_BASE_URL
+        value: ${APP_URL}/api
+        scope: BUILD_TIME
+      # Same backend the live landing page (Vercel) uses today for its CMS content,
+      # enquiry form and policy downloads.
+      - key: REACT_APP_BACKEND_URL
+        value: https://aan-credit-solutions.preview.emergentagent.com
+        scope: BUILD_TIME
