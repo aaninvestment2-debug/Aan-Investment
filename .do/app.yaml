@@ -6,9 +6,16 @@
 #
 # Secrets (DATABASE_URL, SUPABASE_*, SMTP_*, TWILIO_*, ...) are NOT kept here. They are
 # added in the App Platform dashboard as encrypted (SECRET) env vars on the "api" component.
-# ${APP_URL} is the app's live URL: the ondigitalocean.app URL until a custom domain is the primary.
+# ${APP_URL} is the app's primary URL (https://aanfinance.com once the domain below is primary).
+# The starter URL (aan-investment-pydnc.ondigitalocean.app) keeps working alongside it.
 name: aan-investment
 region: blr
+
+domains:
+  - domain: aanfinance.com
+    type: PRIMARY
+  - domain: www.aanfinance.com
+    type: ALIAS
 
 ingress:
   rules:
@@ -46,7 +53,7 @@ services:
         value: "3000"
         scope: RUN_TIME
       - key: CORS_ORIGINS
-        value: ${APP_URL},https://aanfinance.com,https://www.aanfinance.com
+        value: ${APP_URL},https://aanfinance.com,https://www.aanfinance.com,https://aan-investment-pydnc.ondigitalocean.app
         scope: RUN_TIME
       - key: APP_PASSWORD_RESET_URL
         value: ${APP_URL}/reset-password
@@ -64,8 +71,9 @@ static_sites:
     output_dir: dist
     catchall_document: app.html
     envs:
+      # Relative, so the same build works on every hostname the app is served from.
       - key: VITE_API_BASE_URL
-        value: ${APP_URL}/api
+        value: /api
         scope: BUILD_TIME
       # Same backend the live landing page (Vercel) uses today for its CMS content,
       # enquiry form and policy downloads.
