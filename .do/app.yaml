@@ -6,16 +6,17 @@
 #
 # Secrets (DATABASE_URL, SUPABASE_*, SMTP_*, TWILIO_*, ...) are NOT kept here. They are
 # added in the App Platform dashboard as encrypted (SECRET) env vars on the "api" component.
-# ${APP_URL} is the app's primary URL (https://aanfinance.com once the domain below is primary).
-# The starter URL (aan-investment-pydnc.ondigitalocean.app) keeps working alongside it.
+# ${APP_URL} is the app's primary URL (https://www.aanfinance.com).
+# aanfinance.com and the starter URL (aan-investment-pydnc.ondigitalocean.app) serve the same app.
 name: aan-investment
 region: blr
 
 domains:
-  - domain: aanfinance.com
-    type: PRIMARY
   - domain: www.aanfinance.com
+    type: PRIMARY
+  - domain: aanfinance.com
     type: ALIAS
+    zone: aanfinance.com # DNS for aanfinance.com is hosted in DigitalOcean (Networking -> Domains)
 
 ingress:
   rules:
