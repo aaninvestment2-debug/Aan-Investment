@@ -1,0 +1,11 @@
+{
+  "name": "aan-investment-web",
+  "private": true,
+  "description": "Build entry for the combined public website (landing + LMS). See deploy/build-web.sh.",
+  "scripts": {
+    "build": "bash deploy/build-web.sh"
+  },
+  "engines": {
+    "node": "22.x"
+  }
+}
