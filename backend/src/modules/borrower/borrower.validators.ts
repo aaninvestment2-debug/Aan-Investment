@@ -31,7 +31,14 @@ const PAN_RE = /^[A-Z]{5}[0-9]{4}[A-Z]$/;
 const GST_RE = /^[0-9]{2}[A-Z]{5}[0-9]{4}[A-Z][1-9A-Z]Z[0-9A-Z]$/;
 const CIN_RE = /^[LU][0-9]{5}[A-Z]{2}[0-9]{4}[A-Z]{3}[0-9]{6}$/;
 const AADHAAR_RE = /^[0-9]{12}$/;
-const MOBILE_RE = /^(\+91[- ]?)?[6-9][0-9]{9}$/;
+/**
+ * Indian mobile number: ten digits starting 6-9, with an optional `+91`
+ * country code. Matched against the *normalised* value — spaces and hyphens
+ * are stripped first (see `normaliseMobile`), so the pattern itself carries no
+ * separators. The country code is never required: a plain `9391070000` is the
+ * normal way users type their number and must be accepted as-is.
+ */
+const MOBILE_RE = /^(\+91)?[6-9][0-9]{9}$/;
 const PINCODE_RE = /^[1-9][0-9]{5}$/;
 /** CIBIL "CKYC No." — the Central KYC Registry issues 14-digit identifiers. */
 const CKYC_RE = /^[0-9]{14}$/;
@@ -53,7 +60,20 @@ const gst = codedId(GST_RE, "must be a valid GSTIN");
 const cin = codedId(CIN_RE, "must be a valid CIN");
 const aadhaar = z.string().trim().regex(AADHAAR_RE, "must be 12 digits");
 const email = z.string().trim().email("must be a valid email");
-const mobile = z.string().trim().regex(MOBILE_RE, "must be a valid mobile number");
+
+/**
+ * Drops every space and hyphen, wherever they fall — leading, trailing or in
+ * the middle. Numbers arrive pasted from spreadsheets, chats and PDFs as
+ * `" 9391070000"`, `"93910 70000"` or `"+91-93910-70000"`; all of those are the
+ * same number and are stored in the one canonical form.
+ */
+const normaliseMobile = (value: unknown): unknown =>
+    typeof value === "string" ? value.replace(/[\s-]/g, "") : value;
+
+export const mobile = z.preprocess(
+    normaliseMobile,
+    z.string().regex(MOBILE_RE, "must be a valid mobile number"),
+);
 const pincode = z.string().trim().regex(PINCODE_RE, "must be a valid 6-digit pincode");
 const ckycNumber = z.string().trim().regex(CKYC_RE, "must be 14 digits");
 const classOfActivity = z

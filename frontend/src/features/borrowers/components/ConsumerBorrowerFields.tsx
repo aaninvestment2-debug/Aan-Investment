@@ -21,6 +21,7 @@ import {
   PHONE_TITLE,
   SectionTitle,
 } from "./borrowerFormShared";
+import { normalizePhoneInput } from "./phoneFormat";
 
 export type BorrowerFormSection = "basic" | "identity" | "contact" | "address";
 
@@ -127,7 +128,7 @@ export function ConsumerBorrowerFields({
             label="Mobile No."
             type="tel"
             value={form.phone}
-            onChange={(e) => onChange({ phone: e.target.value })}
+            onChange={(e) => onChange({ phone: normalizePhoneInput(e.target.value) })}
             pattern={PHONE_PATTERN}
             title={PHONE_TITLE}
             required

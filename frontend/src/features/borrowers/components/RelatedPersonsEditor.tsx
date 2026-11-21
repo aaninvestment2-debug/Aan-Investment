@@ -20,6 +20,7 @@ import {
 } from "../types";
 import type { Promoter } from "../types";
 import { ChooseOption, PHONE_PATTERN, PHONE_TITLE, SectionTitle } from "./borrowerFormShared";
+import { normalizePhoneInput } from "./phoneFormat";
 
 const BLANK: Promoter = { name: "", pan: "", phone: "" };
 
@@ -284,7 +285,7 @@ function PromoterFields({
           label="Mobile"
           type="tel"
           value={value.phone ?? ""}
-          onChange={(e) => onChange({ phone: e.target.value })}
+          onChange={(e) => onChange({ phone: normalizePhoneInput(e.target.value) })}
           pattern={PHONE_PATTERN}
           title={PHONE_TITLE}
           disabled={disabled}

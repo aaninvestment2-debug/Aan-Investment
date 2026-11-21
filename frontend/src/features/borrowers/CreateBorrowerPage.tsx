@@ -8,6 +8,7 @@ import { SelectField, TextField } from "../../components/ui/Field";
 import { FormErrors } from "../../components/ui/FormErrors";
 import { StepForm } from "../../components/ui/StepForm";
 import { PHONE_PATTERN, PHONE_TITLE } from "./components/BorrowerMasterFields";
+import { normalizePhoneInput } from "./components/phoneFormat";
 import { borrowerFormSteps } from "./components/borrowerFormSteps";
 import { ChooseOption } from "./components/borrowerFormShared";
 import { createBorrower, getBorrower } from "./api";
@@ -204,7 +205,7 @@ export function CreateBorrowerPage() {
                     label="Mobile"
                     type="tel"
                     value={p.phone ?? ""}
-                    onChange={(e) => updatePromoter(i, { phone: e.target.value })}
+                    onChange={(e) => updatePromoter(i, { phone: normalizePhoneInput(e.target.value) })}
                     pattern={PHONE_PATTERN}
                     title={PHONE_TITLE}
                   />
@@ -234,6 +235,12 @@ export function CreateBorrowerPage() {
           onSubmit={handleSubmit}
           submitLabel={createdBorrowerId ? "Done" : "Create borrower"}
           isSubmitting={mutation.isPending}
+          // Every step is reachable from the bar at any point: a detail noticed
+          // on Related Persons often belongs back on Identity, and walking back
+          // through the steps in between to fix it is needless. Nothing is lost
+          // on the way - the panels stay mounted - and Create borrower still
+          // validates all five steps before anything is saved.
+          allowStepJumps
           onCancel={() => navigate("/borrowers")}
           footer={
             <>

@@ -23,9 +23,15 @@ function firstInvalid(el: HTMLElement | null): HTMLInputElement | HTMLSelectElem
  * between them.
  *
  * Next checks only the current step. Saving checks every step in order and,
- * if one is incomplete, opens it and points at the field. When `freeNavigation`
- * is on (editing an existing record) any step can be opened directly;
- * otherwise only steps already reached can.
+ * if one is incomplete, opens it and points at the field — which is what keeps
+ * jumping about from saving a half-filled record.
+ *
+ * Which steps the bar can open:
+ *  - `allowStepJumps` — every step, in any order, from the start. Jumping from
+ *    step 5 back to step 2 and forward again keeps everything already entered.
+ *  - `freeNavigation` (editing an existing record) — same, and additionally
+ *    offers Save on every step rather than only the last.
+ *  - neither — only steps already reached, so a new record is filled in order.
  */
 export function StepForm({
   steps,
@@ -34,6 +40,7 @@ export function StepForm({
   isSubmitting = false,
   onCancel,
   freeNavigation = false,
+  allowStepJumps = false,
   footer,
 }: {
   steps: FormStep[];
@@ -42,11 +49,13 @@ export function StepForm({
   isSubmitting?: boolean;
   onCancel?: () => void;
   freeNavigation?: boolean;
+  /** Let the step bar open any step straight away, without unlocking Save on every step. */
+  allowStepJumps?: boolean;
   /** Shown above the buttons — errors and notices from saving. */
   footer?: ReactNode;
 }) {
   const [current, setCurrent] = useState(0);
-  const [reached, setReached] = useState(freeNavigation ? steps.length - 1 : 0);
+  const [reached, setReached] = useState(0);
   const panels = useRef<Array<HTMLDivElement | null>>([]);
 
   // Steps can come and go (a borrower type with no related persons), so keep
@@ -87,16 +96,22 @@ export function StepForm({
       <ol className="flex overflow-x-auto rounded-lg border border-slate-200 bg-white" aria-label="Form steps">
         {steps.map((step, i) => {
           const isCurrent = i === index;
+          // In edit mode every other step is an already-filled one, so all of
+          // them read as done; while creating, only the ones behind the current
+          // step do.
           const isDone = i < index || (freeNavigation && i !== index);
-          const canOpen = freeNavigation || i <= reached;
+          const canOpen = allowStepJumps || freeNavigation || i <= reached;
           return (
             <li key={step.key} className="min-w-0 flex-1 border-r border-slate-200 last:border-r-0">
               <button
                 type="button"
                 disabled={!canOpen}
-                onClick={() => canOpen && setCurrent(i)}
+                onClick={() => canOpen && open(i)}
                 aria-current={isCurrent ? "step" : undefined}
+                title={canOpen ? `Go to ${step.title}` : undefined}
                 className={`flex w-full items-center gap-3 border-b-2 px-4 py-3 text-left transition-colors disabled:cursor-default ${
+                  canOpen ? "cursor-pointer" : ""
+                } ${
                   isCurrent ? "border-accent bg-accent-soft" : "border-transparent hover:bg-slate-50 disabled:hover:bg-transparent"
                 }`}
               >
