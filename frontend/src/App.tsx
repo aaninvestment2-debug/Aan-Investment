@@ -2,7 +2,6 @@ import { Navigate, Route, Routes } from "react-router-dom";
 import { Layout } from "./components/Layout";
 import { ProtectedRoute } from "./components/ProtectedRoute";
 import { AdminRoute } from "./components/AdminRoute";
-import { LandingPage } from "./features/landing/LandingPage";
 import { LoginPage } from "./features/auth/LoginPage";
 // import { SignupPage } from "./features/auth/SignupPage";
 import { ForgotPasswordPage } from "./features/auth/ForgotPasswordPage";
@@ -28,7 +27,8 @@ import { AuditLogPage } from "./features/audit-log/AuditLogPage";
 export default function App() {
   return (
     <Routes>
-      <Route path="/" element={<LandingPage />} />
+      {/* "/" is served by the public landing site (landing/); inside the LMS it goes to login. */}
+      <Route path="/" element={<Navigate to="/login" replace />} />
       <Route path="/login" element={<LoginPage />} />
       {/* <Route path="/signup" element={<SignupPage />} /> */}
       <Route path="/forgot-password" element={<ForgotPasswordPage />} />

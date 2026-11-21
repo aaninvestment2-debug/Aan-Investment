@@ -522,8 +522,10 @@ export function formStateToCreateInput(f: BorrowerFormState, promoters: Promoter
     groupName: form.groupName || undefined,
     constitution: form.constitution,
     email: form.email || undefined,
-    phone: form.phone || undefined,
-    alternatePhone: form.alternatePhone || undefined,
+    // Trimmed here as well as in the field's onChange: a draft autosaved before
+    // the fields normalized their input can still hold stray spaces.
+    phone: form.phone.trim() || undefined,
+    alternatePhone: form.alternatePhone.trim() || undefined,
     addressLine1: form.addressLine1 || undefined,
     addressLine2: form.addressLine2 || undefined,
     city: form.city || undefined,
@@ -563,8 +565,8 @@ export function formStateToUpdateInput(f: BorrowerFormState): UpdateBorrowerInpu
     groupName: form.groupName || null,
     constitution: form.constitution,
     email: form.email || null,
-    phone: form.phone || null,
-    alternatePhone: form.alternatePhone || null,
+    phone: form.phone.trim() || null,
+    alternatePhone: form.alternatePhone.trim() || null,
     addressLine1: form.addressLine1 || null,
     addressLine2: form.addressLine2 || null,
     city: form.city || null,

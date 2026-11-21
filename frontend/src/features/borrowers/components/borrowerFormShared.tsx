@@ -4,9 +4,18 @@
  * client-side patterns cannot drift from the backend's validators.
  */
 
-/** Matches the backend's Indian-mobile format (an optional +91 prefix, then a 10-digit number starting 6-9). */
-export const PHONE_PATTERN = "^(\\+91[- ]?)?[6-9][0-9]{9}$";
-export const PHONE_TITLE = "Enter a valid 10-digit Indian mobile number, e.g. 9876543210 or +91 9876543210";
+/**
+ * Matches the backend's Indian-mobile format: a 10-digit number starting 6-9,
+ * with an optional +91 prefix. The +91 is never required — a plainly typed
+ * 9391070000 is valid on its own.
+ *
+ * The browser matches `pattern` against the raw input value and does not trim
+ * it, so every phone field runs its value through `normalizePhoneInput` first;
+ * that keeps the box free of the spaces and hyphens that come with a pasted
+ * number and which would otherwise fail this pattern.
+ */
+export const PHONE_PATTERN = "^(\\+91)?[6-9][0-9]{9}$";
+export const PHONE_TITLE = "Enter a valid 10-digit Indian mobile number, e.g. 9876543210 or +919876543210";
 
 /** Matches the backend's PAN format: 5 letters, 4 digits, 1 letter (e.g. AAAAA9999A). */
 export const PAN_PATTERN = "^[A-Za-z]{5}[0-9]{4}[A-Za-z]$";
